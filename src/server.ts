@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { authRouter } from "./routes/auth.routes.js";
 import { adminRouter } from "./routes/admin.routes.js";
+import { progressRouter } from "./routes/progress.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -19,6 +20,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/progress", progressRouter);
 
 app.use(errorHandler);
 

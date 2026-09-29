@@ -20,14 +20,15 @@ enum Role {
 }
 
 model User {
-  id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  email         String         @unique
+  id            String             @id @default(auto()) @map("_id") @db.ObjectId
+  email         String             @unique
   name          String
   passwordHash  String
-  role          Role           @default(USER)
+  role          Role               @default(USER)
   refreshTokens RefreshToken[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  progress      ExerciseProgress[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 }
 
 model RefreshToken {
@@ -43,4 +44,18 @@ model RefreshToken {
 
   @@index([userId])
   @@index([familyId])
+}
+
+model ExerciseProgress {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summarySlug String
+  exerciseKey String
+  data        Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, summarySlug, exerciseKey])
+  @@index([userId, summarySlug])
 }
