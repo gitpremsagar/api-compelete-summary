@@ -56,7 +56,15 @@ export function setAuthCookies(res: Response, accessToken: string, refreshToken:
 }
 
 export function clearAuthCookies(res: Response) {
-    res.clearCookie(ACCESS_COOKIE, { ...baseCookie, path: "/" });
-    res.clearCookie(REFRESH_COOKIE, { ...baseCookie, path: REFRESH_COOKIE_PATH });
-    res.clearCookie(SESSION_HINT_COOKIE, { ...baseCookie, path: "/" });
+    const variants: CookieOptions[] = [baseCookie];
+    // Cookies set before COOKIE_DOMAIN was configured are host-only and must be cleared without a domain.
+    if (env.COOKIE_DOMAIN) {
+        const { domain: _domain, ...hostOnly } = baseCookie;
+        variants.push(hostOnly);
+    }
+    for (const options of variants) {
+        res.clearCookie(ACCESS_COOKIE, { ...options, path: "/" });
+        res.clearCookie(REFRESH_COOKIE, { ...options, path: REFRESH_COOKIE_PATH });
+        res.clearCookie(SESSION_HINT_COOKIE, { ...options, path: "/" });
+    }
 }
