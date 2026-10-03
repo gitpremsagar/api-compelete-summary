@@ -10,7 +10,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 const app = express();
 
 app.set("trust proxy", 1);
-app.use(cors({ origin: env.CLIENT_URL, credentials: true }));
+app.use(cors({ origin: ["http://localhost:3000", "https://www.completesummary.com","https://completesummary.com"], credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
