@@ -27,6 +27,8 @@ model User {
   role          Role               @default(USER)
   refreshTokens RefreshToken[]
   progress      ExerciseProgress[]
+  reactions     Reaction[]
+  comments      Comment[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
 }
@@ -58,4 +60,41 @@ model ExerciseProgress {
 
   @@unique([userId, summarySlug, exerciseKey])
   @@index([userId, summarySlug])
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+}
+
+model SummaryStats {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  slug      String   @unique
+  views     Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
+model Reaction {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String       @db.ObjectId
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summarySlug String
+  type        ReactionType
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@unique([userId, summarySlug])
+  @@index([summarySlug, type])
+}
+
+model Comment {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summarySlug String
+  body        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([summarySlug, createdAt])
 }
