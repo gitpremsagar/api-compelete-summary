@@ -11,7 +11,8 @@
     "build":"npx prisma generate && tsc",
     "postinstall": "npx prisma generate",
     "start": "node dist/server.js",
-    "make-admin": "tsx src/scripts/make-admin.ts"
+    "make-admin": "tsx src/scripts/make-admin.ts",
+    "seed:admin": "tsx src/scripts/seed-admin.ts"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",

@@ -73,6 +73,9 @@ export async function login(input: { email: string; password: string }): Promise
     if (!user || !valid) {
         throw new HttpError(401, "Invalid email or password");
     }
+    if (user.deletedAt) {
+        throw new HttpError(403, "This account has been suspended");
+    }
     return issueTokens(user);
 }
 
@@ -107,6 +110,10 @@ export async function refresh(presentedToken: string): Promise<AuthResult> {
         throw new HttpError(401, "Refresh token already used");
     }
 
+    if (stored.user.deletedAt) {
+        throw new HttpError(401, "This account has been suspended");
+    }
+
     return issueTokens(stored.user, stored.familyId);
 }
 
@@ -119,6 +126,6 @@ export async function logout(presentedToken: string | undefined): Promise<void> 
 }
 
 export async function getUserById(id: string): Promise<PublicUser | null> {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.user.findFirst({ where: { id, deletedAt: null } });
     return user ? toPublicUser(user) : null;
 }

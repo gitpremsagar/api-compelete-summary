@@ -31,6 +31,10 @@ model User {
   comments      Comment[]
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?            @db.ObjectId
+
+  @@index([deletedAt])
 }
 
 model RefreshToken {
@@ -88,13 +92,48 @@ model Reaction {
 }
 
 model Comment {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String   @db.ObjectId
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   summarySlug String
   body        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  deletedBy   String?   @db.ObjectId
 
   @@index([summarySlug, createdAt])
+  @@index([deletedAt, createdAt])
+}
+
+// Summaries live on disk (TS metadata + MDX); this table holds only the editorial status.
+enum SummaryStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model SummaryDocument {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  slug        String        @unique
+  status      SummaryStatus @default(PUBLISHED)
+  archivedAt  DateTime?
+  archivedBy  String?       @db.ObjectId
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model AdminAction {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  adminId   String   @db.ObjectId
+  adminName String
+  action    String
+  target    String
+  targetId  String?
+  details   Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
 }

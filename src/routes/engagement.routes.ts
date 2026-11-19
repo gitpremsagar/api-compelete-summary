@@ -46,7 +46,7 @@ async function getStats(slugs: string[]): Promise<Record<string, Stats>> {
         }),
         prisma.comment.groupBy({
             by: ["summarySlug"],
-            where: { summarySlug: { in: slugs } },
+            where: { summarySlug: { in: slugs }, deletedAt: null },
             _count: { _all: true },
         }),
     ]);
@@ -160,7 +160,7 @@ engagementRouter.get("/:slug/comments", validateSlug, optionalAuthenticate, asyn
     const limit = Number.isInteger(limitParam) && limitParam > 0 ? Math.min(limitParam, MAX_COMMENT_PAGE) : DEFAULT_COMMENT_PAGE;
 
     const rows = await prisma.comment.findMany({
-        where: { summarySlug },
+        where: { summarySlug, deletedAt: null },
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: limit + 1,
         ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),

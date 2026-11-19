@@ -15,6 +15,10 @@ const envSchema = z.object({
         .transform((value) => value.split(",").map((origin) => origin.trim()).filter(Boolean)),
     // Set to the parent domain in production (e.g. ".example.com") so the frontend subdomain can see the session cookies.
     COOKIE_DOMAIN: z.string().optional(),
+    // Filesystem path to the Next.js app. The admin API edits its content files and asks it to revalidate.
+    FRONTEND_DIR: z.string().default("../frontend"),
+    // Shared secret for the frontend's admin mutation routes. Required in production.
+    ADMIN_INTERNAL_SECRET: z.string().min(16).optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -26,3 +30,7 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 export const isProduction = env.NODE_ENV === "production";
+
+if (isProduction && !env.ADMIN_INTERNAL_SECRET) {
+    console.warn("ADMIN_INTERNAL_SECRET is not set: admin content editing will fail in production.");
+}
